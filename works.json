@@ -1,0 +1,140 @@
+{
+  "works": {
+    "portrait": [
+      {
+        "yt": "8x27kQ1l6jQ",
+        "v": true
+      },
+      {
+        "yt": "Gl_qK3lT6bE",
+        "v": true
+      },
+      {
+        "yt": "gB23GZ-agJA",
+        "v": true
+      },
+      {
+        "yt": "sSnaAsn7sJ8",
+        "v": true
+      }
+    ],
+    "animated-reels": [],
+    "appearances": [],
+    "horeca": [
+      {
+        "yt": "q4UGhoJr2Ds",
+        "v": true
+      },
+      {
+        "yt": "cEciSl2MK7I",
+        "v": true
+      },
+      {
+        "yt": "Ofmon_Zu_wM",
+        "v": true
+      },
+      {
+        "yt": "oTO_m7bcPW8",
+        "v": true
+      },
+      {
+        "yt": "ztl5Ftpv4gs",
+        "v": true
+      },
+      {
+        "yt": "P0ZuKVM6__M",
+        "v": true
+      },
+      {
+        "yt": "ACZ7-5Sa150",
+        "v": true
+      },
+      {
+        "yt": "F-pfyjQ0A0U",
+        "v": true
+      }
+    ],
+    "fashion": [
+      {
+        "yt": "sPZ7g3HsHZ4",
+        "v": true
+      },
+      {
+        "yt": "fjBQc17Uvd0",
+        "v": true
+      },
+      {
+        "yt": "uOu-hXZE1yQ",
+        "v": true
+      }
+    ],
+    "podcast": [],
+    "talking-head": [
+      {
+        "yt": "s8C43aErscM",
+        "v": true
+      },
+      {
+        "yt": "g_d9eW-KPxw",
+        "v": true
+      }
+    ],
+    "backstage": [
+      {
+        "yt": "9nUPewJb4yM"
+      }
+    ],
+    "sport": [],
+    "events": [
+      {
+        "yt": "2QUJ3TmFOJ8"
+      },
+      {
+        "yt": "Bsgnpl1g6og"
+      },
+      {
+        "yt": "Us_j3dY6cTI"
+      },
+      {
+        "yt": "5Dze94Z_tb4"
+      },
+      {
+        "yt": "-EX1U0tiDoA",
+        "v": true
+      },
+      {
+        "yt": "ReNbsp_MmEU",
+        "v": true
+      },
+      {
+        "yt": "8mE2rpsMwBw",
+        "v": true
+      },
+      {
+        "yt": "4NxdGlEjXqU",
+        "v": true
+      }
+    ],
+    "video-clips": []
+  },
+  "clients": [
+    {
+      "name": "AURA"
+    },
+    {
+      "name": "NORD"
+    },
+    {
+      "name": "MAISON"
+    },
+    {
+      "name": "VERTE"
+    },
+    {
+      "name": "LUMA"
+    },
+    {
+      "name": "OKO"
+    }
+  ]
+}
