@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>di.cin.prod - редактор работ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:light;
+    --ink:#111;--muted:#8a8a8a;--muted2:#b4b4b4;
+    --line:#e7e7e7;--soft:#f6f6f6;
+    --ok:#0a7d32;--warn:#b45309;--err:#b42318;
+    --display:"Bricolage Grotesque",sans-serif;
+    --body:"Hanken Grotesk",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 120px}
+
+  h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin-top:4px}
+
+  .status{
+    margin:18px 0 26px;padding:12px 14px;border:1px solid var(--line);
+    background:var(--soft);font-size:14px;border-radius:2px;
+  }
+  .status b{font-weight:600}
+  .status.ok{border-color:#bfe3c9;background:#f2fbf5}
+  .status.warn{border-color:#f0dcc0;background:#fdf8f0}
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+  button{
+    font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.02em;
+    padding:10px 16px;border:1px solid var(--ink);background:var(--ink);color:#fff;
+    cursor:pointer;border-radius:2px;transition:opacity .15s ease;
+  }
+  button:hover{opacity:.82}
+  button.ghost{background:#fff;color:var(--ink)}
+  button.tiny{font-size:12px;padding:6px 10px}
+  button.danger{background:#fff;color:var(--err);border-color:#e7c4c0}
+
+  label{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  input[type=text],select{
+    width:100%;font-family:var(--body);font-size:15px;color:var(--ink);
+    padding:10px 12px;border:1px solid var(--line);border-radius:2px;background:#fff;
+  }
+  input:focus,select:focus{outline:2px solid var(--ink);outline-offset:1px}
+
+  .card{border:1px solid var(--line);padding:20px;margin-bottom:26px;border-radius:2px}
+  .card h2{font-family:var(--display);font-size:17px;font-weight:600;margin-bottom:14px}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .form-grid .full{grid-column:1/-1}
+
+  .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:400}
+  .chk input{width:17px;height:17px;accent-color:#111}
+
+  /* tabs */
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+  .tabs button{
+    background:#fff;color:var(--ink);border:1px solid var(--line);
+    font-weight:500;padding:8px 12px;
+  }
+  .tabs button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tabs .cnt{color:var(--muted2);font-weight:400;margin-left:5px}
+  .tabs button.active .cnt{color:#bbb}
+
+  /* list */
+  .item{
+    display:flex;gap:14px;align-items:center;
+    border:1px solid var(--line);padding:10px;margin-bottom:10px;border-radius:2px;background:#fff;
+  }
+  .item img{width:112px;height:63px;object-fit:cover;background:var(--soft);flex-shrink:0}
+  .item.vert img{width:63px;height:112px}
+  .item .meta{flex:1;min-width:0}
+  .item .t{font-family:var(--display);font-weight:600;font-size:15px;word-break:break-word}
+  .item .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .badge{
+    display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;
+    padding:2px 7px;border:1px solid var(--line);color:var(--muted);margin-left:6px;border-radius:2px;
+  }
+  .item .acts{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:230px}
+  .empty{color:var(--muted);font-size:14px;padding:18px 0;text-align:center;border:1px dashed var(--line)}
+
+  /* sticky save */
+  .savebar{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;
+    background:#fff;border-top:1px solid var(--line);
+    padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .savebar .hint{font-size:13px;color:var(--muted)}
+  .dirty{color:var(--warn);font-weight:600}
+
+  @media(max-width:720px){
+    .form-grid{grid-template-columns:1fr}
+    .item{flex-wrap:wrap}
+    .item .acts{max-width:none;width:100%;justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Редактор работ</h1>
+  <div class="sub">di.cin.prod - добавляй видео, потом скачай works.json и залей его в репозиторий</div>
+
+  <div class="status" id="status">Загружаю текущий список…</div>
+
+  <!-- ADD -->
+  <div class="card">
+    <h2>Добавить работу</h2>
+    <div class="form-grid">
+      <div class="full">
+        <label>Ссылка на YouTube</label>
+        <input type="text" id="fUrl" placeholder="https://youtu.be/... или https://youtube.com/watch?v=...">
+      </div>
+      <div>
+        <label>Название</label>
+        <input type="text" id="fTitle" placeholder="Например: Sushi Bar - промо">
+      </div>
+      <div>
+        <label>Раздел</label>
+        <select id="fCat"></select>
+      </div>
+      <div class="full">
+        <label class="chk"><input type="checkbox" id="fVert"> Вертикальное видео (Reels / Shorts)</label>
+      </div>
+    </div>
+    <div class="row">
+      <button id="btnAdd">Добавить</button>
+      <span class="hint" id="addHint" style="font-size:13px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div class="card">
+    <h2>Работы по разделам</h2>
+    <div class="tabs" id="tabs"></div>
+    <div id="list"></div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="card">
+    <h2>Логотипы клиентов (карусель)</h2>
+    <div class="form-grid">
+      <div>
+        <label>Название текстом</label>
+        <input type="text" id="cName" placeholder="AURA">
+      </div>
+      <div>
+        <label>Или путь к картинке</label>
+        <input type="text" id="cImg" placeholder="logos/aura.svg">
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:14px">
+      <button id="btnAddClient" class="ghost">Добавить логотип</button>
+    </div>
+    <div id="clientList"></div>
+  </div>
+
+</div>
+
+<div class="savebar">
+  <div class="hint" id="saveHint">Изменений нет</div>
+  <div class="row">
+    <button class="ghost" id="btnLoadFile">Загрузить works.json</button>
+    <button id="btnSave">Скачать works.json</button>
+  </div>
+</div>
+<input type="file" id="filePicker" accept=".json,application/json" style="display:none">
+
+<script>
+const CATEGORIES = [
+  { slug:"portrait",       name:"Portrait" },
+  { slug:"animated-reels", name:"Animated Reels" },
+  { slug:"appearances",    name:"My Appearances" },
+  { slug:"horeca",         name:"Horeca" },
+  { slug:"fashion",        name:"Fashion" },
+  { slug:"podcast",        name:"Podcast" },
+  { slug:"talking-head",   name:"Talking Head" },
+  { slug:"backstage",      name:"Backstage" },
+  { slug:"sport",          name:"Sport" },
+  { slug:"events",         name:"Events" },
+  { slug:"video-clips",    name:"Video Clips" },
+];
+
+let DATA = { works:{}, clients:[] };
+let activeCat = CATEGORIES[0].slug;
+let loadedFrom = null;   // "site" | "file" | null
+let dirty = false;
+
+CATEGORIES.forEach(c=> DATA.works[c.slug] = []);
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const catName = s => (CATEGORIES.find(c=>c.slug===s)||{}).name || s;
+
+function parseYT(url){
+  if(!url) return null;
+  url = url.trim();
+  // уже голый ID
+  if(/^[\w-]{11}$/.test(url)) return url;
+  const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+function setStatus(text, cls){
+  const el = $("status");
+  el.className = "status" + (cls ? " "+cls : "");
+  el.innerHTML = text;
+}
+
+function markDirty(){
+  dirty = true;
+  $("saveHint").innerHTML = '<span class="dirty">Есть несохранённые изменения</span> - скачай works.json и залей в репозиторий';
+}
+
+function totalCount(){
+  return CATEGORIES.reduce((n,c)=> n + (DATA.works[c.slug]||[]).length, 0);
+}
+
+// ---------- load ----------
+function applyLoaded(data, from){
+  if(data && data.works){
+    CATEGORIES.forEach(c=>{
+      if(Array.isArray(data.works[c.slug])) DATA.works[c.slug] = data.works[c.slug];
+    });
+  }
+  if(Array.isArray(data.clients)) DATA.clients = data.clients;
+  loadedFrom = from;
+  dirty = false;
+  $("saveHint").textContent = "Изменений нет";
+  renderAll();
+}
+
+fetch("works.json", {cache:"no-store"})
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => {
+    applyLoaded(d, "site");
+    setStatus(`Загружен текущий список: <b>${totalCount()}</b> работ. Добавляй новые - старые не потеряются.`, "ok");
+  })
+  .catch(()=>{
+    setStatus(
+      'Не удалось прочитать <b>works.json</b> автоматически (так бывает, если открыть файл двойным кликом с компьютера).<br>' +
+      'Нажми <b>«Загрузить works.json»</b> внизу и выбери текущий файл - иначе скачанный список перезапишет старые работы.',
+      "warn");
+    renderAll();
+  });
+
+$("btnLoadFile").addEventListener("click", ()=> $("filePicker").click());
+$("filePicker").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      applyLoaded(JSON.parse(r.result), "file");
+      setStatus(`Файл загружен: <b>${totalCount()}</b> работ. Можно добавлять новые.`, "ok");
+    }catch(err){
+      setStatus("Не получилось прочитать файл - похоже, это не works.json.", "warn");
+    }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+
+// ---------- add ----------
+$("btnAdd").addEventListener("click", ()=>{
+  const url = $("fUrl").value;
+  const id = parseYT(url);
+  if(!id){
+    $("addHint").textContent = "Проверь ссылку - не нашёл ID видео.";
+    $("addHint").style.color = "#b42318";
+    return;
+  }
+  const cat = $("fCat").value;
+  const dup = (DATA.works[cat]||[]).some(w=>w.yt===id);
+  if(dup){
+    $("addHint").textContent = "Это видео уже есть в разделе.";
+    $("addHint").style.color = "#b45309";
+    return;
+  }
+  const item = { yt:id };
+  const t = $("fTitle").value.trim();
+  if(t) item.title = t;
+  if($("fVert").checked) item.v = true;
+
+  DATA.works[cat].push(item);
+  activeCat = cat;
+  markDirty();
+  renderAll();
+
+  $("fUrl").value = ""; $("fTitle").value = ""; $("fVert").checked = false;
+  $("addHint").textContent = "Добавлено в «" + catName(cat) + "»";
+  $("addHint").style.color = "#0a7d32";
+  $("fUrl").focus();
+});
+
+$("fUrl").addEventListener("keydown", e=>{ if(e.key==="Enter") $("btnAdd").click(); });
+
+// ---------- render ----------
+function renderTabs(){
+  $("tabs").innerHTML = CATEGORIES.map(c=>{
+    const n = (DATA.works[c.slug]||[]).length;
+    return `<button data-cat="${c.slug}" class="${c.slug===activeCat?"active":""}">${c.name}<span class="cnt">${n}</span></button>`;
+  }).join("");
+  $("tabs").querySelectorAll("button").forEach(b=>
+    b.addEventListener("click", ()=>{ activeCat = b.dataset.cat; renderAll(); }));
+}
+
+function renderList(){
+  const items = DATA.works[activeCat] || [];
+  if(!items.length){
+    $("list").innerHTML = `<div class="empty">В разделе «${catName(activeCat)}» пока нет работ</div>`;
+    return;
+  }
+  $("list").innerHTML = items.map((w,i)=>`
+    <div class="item ${w.v?"vert":""}">
+      <img src="https://i.ytimg.com/vi/${w.yt}/mqdefault.jpg" alt="">
+      <div class="meta">
+        <div class="t">${w.title ? escapeHtml(w.title) : '<span style="color:var(--muted2)">Без названия</span>'}${w.v?'<span class="badge">Вертикальное</span>':''}</div>
+        <div class="d">${w.yt} &middot; позиция ${i+1}</div>
+      </div>
+      <div class="acts">
+        <button class="tiny ghost" data-act="up" data-i="${i}" ${i===0?"disabled":""}>Вверх</button>
+        <button class="tiny ghost" data-act="down" data-i="${i}" ${i===items.length-1?"disabled":""}>Вниз</button>
+        <button class="tiny ghost" data-act="rename" data-i="${i}">Название</button>
+        <button class="tiny ghost" data-act="flip" data-i="${i}">${w.v?"Сделать гориз.":"Сделать верт."}</button>
+        <button class="tiny danger" data-act="del" data-i="${i}">Удалить</button>
+      </div>
+    </div>`).join("");
+
+  $("list").querySelectorAll("button[data-act]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const i = +b.dataset.i, arr = DATA.works[activeCat];
+      switch(b.dataset.act){
+        case "up":   [arr[i-1],arr[i]] = [arr[i],arr[i-1]]; break;
+        case "down": [arr[i+1],arr[i]] = [arr[i],arr[i+1]]; break;
+        case "flip": arr[i].v ? delete arr[i].v : arr[i].v = true; break;
+        case "del":
+          if(!confirm("Удалить эту работу из раздела?")) return;
+          arr.splice(i,1); break;
+        case "rename": {
+          const t = prompt("Название работы:", arr[i].title||"");
+          if(t===null) return;
+          t.trim() ? arr[i].title = t.trim() : delete arr[i].title;
+          break;
+        }
+      }
+      markDirty(); renderAll();
+    });
+  });
+}
+
+function renderClients(){
+  if(!DATA.clients.length){
+    $("clientList").innerHTML = `<div class="empty">Логотипов пока нет - в карусели будет пусто</div>`;
+    return;
+  }
+  $("clientList").innerHTML = DATA.clients.map((c,i)=>`
+    <div class="item">
+      <div class="meta">
+        <div class="t">${c.img ? escapeHtml(c.img) : escapeHtml(c.name||"")}</div>
+        <div class="d">${c.img ? "картинка" : "текст"} &middot; позиция ${i+1}</div>
+      </div>
+      <div class="acts">
+        <button class="tiny ghost" data-cact="up" data-i="${i}" ${i===0?"disabled":""}>Вверх</button>
+        <button class="tiny ghost" data-cact="down" data-i="${i}" ${i===DATA.clients.length-1?"disabled":""}>Вниз</button>
+        <button class="tiny danger" data-cact="del" data-i="${i}">Удалить</button>
+      </div>
+    </div>`).join("");
+
+  $("clientList").querySelectorAll("button[data-cact]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const i = +b.dataset.i, arr = DATA.clients;
+      if(b.dataset.cact==="up")   [arr[i-1],arr[i]] = [arr[i],arr[i-1]];
+      if(b.dataset.cact==="down") [arr[i+1],arr[i]] = [arr[i],arr[i+1]];
+      if(b.dataset.cact==="del")  arr.splice(i,1);
+      markDirty(); renderAll();
+    });
+  });
+}
+
+$("btnAddClient").addEventListener("click", ()=>{
+  const name = $("cName").value.trim(), img = $("cImg").value.trim();
+  if(!name && !img) return;
+  DATA.clients.push(img ? {img} : {name});
+  $("cName").value = ""; $("cImg").value = "";
+  markDirty(); renderAll();
+});
+
+function renderCatSelect(){
+  if($("fCat").options.length) return;
+  $("fCat").innerHTML = CATEGORIES.map(c=>`<option value="${c.slug}">${c.name}</option>`).join("");
+}
+
+function renderAll(){
+  renderCatSelect();
+  renderTabs();
+  renderList();
+  renderClients();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+// ---------- save ----------
+$("btnSave").addEventListener("click", ()=>{
+  if(loadedFrom === null && totalCount() === 0 && !DATA.clients.length){
+    if(!confirm("Текущий список не был загружен, файл получится пустым. Всё равно скачать?")) return;
+  }
+  if(loadedFrom === null && totalCount() > 0){
+    if(!confirm("Текущий список не загружался с сайта - файл заменит собой всё, что было раньше. Продолжить?")) return;
+  }
+  const out = { works:{}, clients:DATA.clients };
+  CATEGORIES.forEach(c=> out.works[c.slug] = DATA.works[c.slug] || []);
+
+  const blob = new Blob([JSON.stringify(out,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "works.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  dirty = false;
+  $("saveHint").innerHTML = 'Файл скачан. Не забудь <b>заменить works.json</b> в репозитории (имя должно остаться works.json).';
+});
+
+window.addEventListener("beforeunload", e=>{
+  if(dirty){ e.preventDefault(); e.returnValue = ""; }
+});
+
+renderAll();
+</script>
+</body>
+</html>
